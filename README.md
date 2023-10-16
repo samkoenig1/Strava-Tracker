@@ -1,10 +1,10 @@
 
 # Strava-Tracker
-This is a simple python dash application to pull data from your strava application, and display back simple stats such as (1) Total Distance (2) Avg miles per hour (3) Number of Activities and (4) Average Speed all over time. This application is set up so that you can bring in your own strava account if you are interested. This does assume you have a basic understanding of apis / python dash. 
+This is a simple python dash application to pull data from your strava application, and display back simple stats such as (1) Total Distance (2) Avg miles per hour (3) Number of Activities and (4) Average Speed all over time by month. This application is set up so that you can bring in your own strava account if you are interested. This does assume you have a basic understanding of apis / python dash. 
 
 **In order to run this program, you'll need:**
 - A Strava account.
-- At least one activity recorded on that Strava account and one saved piece of gear associated with that activity.
+- At least one activity recorded on that Strava account, ideally more.
 - A personal API application on that Strava account.
 - and the corresponding client_id, client_secret and refresh_token for that API application.
 
