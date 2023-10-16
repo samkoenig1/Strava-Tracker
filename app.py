@@ -45,6 +45,9 @@ activities.distance = activities.distance / 1609
 #convert km/hr --> mph
 activities.average_speed = activities.average_speed * 2.237
 
+#only select activities that are of "sport_type = Run"
+
+activities = activities[activities['sport_type'] == "Run"]
 #convert start date into string month
 activities['start_date_month'] = pd.DatetimeIndex(activities['start_date_local']).month
 
@@ -53,7 +56,12 @@ activities['start_date_year'] = pd.DatetimeIndex(activities['start_date_local'])
 activities['year_month'] = activities.start_date_month.map(str) + '/' + activities.start_date_year.map(str)
 
 #group actiities by number of actiities, total distance, and average speed
-activities = activities.groupby('year_month').agg({'year_month':'min','id':'count', 'distance':'sum','average_speed': 'mean', 'start_date_local':'min'})
+activities = activities.groupby('year_month').agg({
+'year_month':'min',
+'id':'count',
+ 'distance':'sum',
+ 'average_speed': 'mean',
+ 'start_date_local':'min'})
 
 #rename columns
 activities.columns = ['year_month','number_of_activities','total_distance','average_speed','start_date']
@@ -68,8 +76,33 @@ activities = activities.round(1)
 app = Dash(__name__)
 app = Dash(external_stylesheets=[dbc.themes.CERULEAN])
 
+
 #Create app layout
-app.layout = html.Div([
+app.layout = dbc.Container([
+    html.Br(),
+    dbc.Row([html.H1('Strava Activities Over Time')]),
+    dbc.Row([html.Div('Select Metric Below:', className="text-secondary")]),
+#Create dropdown for metrics of interest
+    dbc.Row([
+        dcc.Dropdown(
+                id="dropdown",
+                options=["Total Distance (Miles)", "# Activities", "Average Speed", "Avg Miles / Run"],
+                value= "Total Distance (Miles)",
+                )
+    ]),
+    html.Br(),
+    #container for graph to live in
+    dbc.Row([
+        html.Div(dbc.Col(dcc.Graph(id="graph"), width=12),className = "border"),
+    ]),
+    html.Br(),
+    dbc.Row([html.Div(
+    ["Note: This data pulls from the strava API, specifically the 'activities' endpoint. The code should work for anyone with a few steps. To learn more, check out the repository "
+    ,html.A("here", href="https://github.com/samkoenig1/Strava-Tracker/blob/main/README.md")], className="text-primary")],
+    ),
+])
+
+html.Div([
 # Title of the App
     html.H1('Strava Activities Over Time',
         style = {'margin-left':'25px'}),
@@ -94,32 +127,36 @@ app.layout = html.Div([
 #Create dynamic chart
 def update_bar_chart(dropdown):
     df = activities # replace with your own data source
-
 #Based on the dropdown adjust the Y value of interest between Average speed, average distance, # activities, and avg miles / run
+# Create chart if Total Distance is selected
     if dropdown == "Total Distance (Miles)":
           fig = px.bar(df, x="year_month",
           y= "total_distance",
           color = "total_distance",
           text_auto = True,
           labels = {'year_month': 'Date', 'total_distance': 'Total Distance (Miles)'}, )
+# Create chart if # Activities is selected
     elif dropdown == "# Activities":
           fig = px.bar(df, x="year_month",
           y= "number_of_activities",
           color = "number_of_activities",
           text_auto = True,
           labels = {'year_month': 'Date', 'number_of_activities': '# Activities'})
+# Create chart if Average Speed is selected
     elif dropdown == "Average Speed":
           fig = px.bar(df, x="year_month",
           y= "average_speed",
           color = "average_speed",
           text_auto = True,
           labels = {'year_month': 'Date', 'average_speed': 'Average Speed'})
+# Create chart if Avg Miles / Run is selected
     elif dropdown == "Avg Miles / Run":
           fig = px.bar(df, x="year_month",
           y= "avg_activities_month",
           color = "avg_activities_month",
           text_auto = True,
           labels = {'year_month': 'Date', 'avg_activities_month': 'Average Miles / Run'})
+#rotate x axis 45 degrees
     fig.update_xaxes(tickangle=45)
     return fig
 
